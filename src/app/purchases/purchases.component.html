@@ -1,0 +1,57 @@
+<div class="content">
+    <header class="header">
+        <div class="header__logo">
+            <a href="#">
+                <img src="assets/icons/logo.svg" alt="">
+            </a>
+            <span *ngIf="purchasesService.countAllPurchasesToBuy$ | async" class="header__count">{{ purchasesService.countAllPurchasesToBuy$ | async }}</span>
+        </div>
+        <h1 class="header__title">Shopping List</h1>
+    </header>
+    <button (click)="openPopup()" class="content__btn" type="button">+</button>
+
+    <div class="swiper-filter">
+        <swiper-container
+        #swiperThumbs
+        slides-per-view="3"
+        mousewheel-invert="true"
+        sensitivity="2"
+        navigation="true"
+        >
+            <swiper-slide
+            [class.active]="(purchasesService.selectedCategory$ | async) === null"
+            class="swiper-filter__item--all"
+            (click)="purchasesService.selectCategory(null)">
+                All
+                <span>{{ purchasesService.countAllPurchases }}</span>
+            </swiper-slide>
+
+            <swiper-slide [class.active]="(purchasesService.selectedCategory$ | async) === category.id" (click)="purchasesService.selectCategory(category.id)" [ngStyle]="{'background-color':  category.colour}" *ngFor="let category of (purchasesService.swiperCategories$ | async)">
+                {{category.name}}
+                <span>{{purchasesService.countPurchasesPerCategory.get(category.id) }}</span>
+            </swiper-slide>
+
+        </swiper-container>
+    </div>
+    <ul class="shopping-list">
+        <li (click)="purchasesService.makeComplitePurchaseById(purchase.id)" *ngFor="let purchase of (purchasesService.purchasesFiltered$ | async)" class="shopping-list__item">
+            <div class="shopping-list__check-box">
+                <div class="shopping-list__check-circle">
+                    <svg class="shopping-list__animated-check" viewBox="0 0 24 24">
+                        <path [ngClass]="purchase.isCrossOut ? 'check': 'not-check'" d="M4.1 12.7L9 17.6 20.3 6.3" fill="none" />
+                    </svg>
+                </div>
+            </div>
+            <div [ngStyle]="{'border-color': purchase.category.colour}" class="shopping-list__purchase" [ngClass]="purchase.isCrossOut ? 'cross' : 'not-cross'">
+                <span [ngStyle]="{'color': purchase.category.colour}" class="shopping-list__category-name">{{purchase.category.name}}</span>
+                <span class="shopping-list__purchase-name">{{purchase.name}}</span>
+                <button [class.off-hover]="purchase.isCrossOut" type="button" class="shopping-list__item-btn shopping-list__item-btn--del" (click)="deletePurchase(purchase.id)">
+                    <svg viewBox="0 0 81.165 81.165" [class.off-hover]="purchase.isCrossOut" class="shopping-list__item-btn-icon">
+                        <use xlink:href="assets/icons/garbage.svg#garbage"></use>
+                    </svg>
+                </button>
+            </div>
+        </li>
+    </ul>
+</div>
+
